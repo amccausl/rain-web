@@ -1,0 +1,24 @@
+Default: &defaults
+  user: rain-web
+  password: rain-web
+  host: localhost
+  database: rain-web
+  connections: 10
+
+Development:
+  <<: *defaults
+
+Testing:
+  database: rain-web_test
+  <<: *defaults
+
+Staging:
+  database: rain-web_staging
+  connections: 100
+  <<: *defaults
+
+Production:
+  database: rain-web_production
+  connections: 100
+  host: localhost
+  <<: *defaults
