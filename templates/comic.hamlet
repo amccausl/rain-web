@@ -1,0 +1,10 @@
+<h1>_{MsgHello}
+
+<ol>
+  <li>Now that you have a working project you should use the #
+    \<a href="http://www.yesodweb.com/book/">Yesod book</a> to learn more. #
+    You can also use this scaffolded site to explore some basic concepts.
+
+  <li> And last but not least, Testing. In <em>tests/main.hs</em> you will find a #
+    test suite that performs tests on this page. #
+    You can run your tests by doing: <pre>yesod test</pre>
