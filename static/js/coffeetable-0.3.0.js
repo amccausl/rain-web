@@ -22,8 +22,8 @@ Load `coffeetable-min.js` into the page:
   VERSION = [0, 3, 0];
 
   defaults = {
-    autoload_coffee_script: true,
-    autoload_jquery: true,
+    autoload_coffee_script: false,
+    autoload_jquery: false,
     coffeescript_js: 'http://cdnjs.cloudflare.com/ajax/libs/coffee-script/1.2.0/coffee-script.min.js',
     jquery_js: 'http://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js',
     local_storage: true,
@@ -94,7 +94,7 @@ Load `coffeetable-min.js` into the page:
   init = function(opts) {
     if (opts == null) opts = {};
     if (loaded_scripts.jquery_js && loaded_scripts.coffeescript_js) {
-      $ = window.jQuery;
+      $ = window.jQuery || window.Zepto;
       if ((settings.adopt_log || settings.adopt_dir) && !(window.console != null)) {
         window.console = {};
         if (settings.adopt_log) {
@@ -732,7 +732,7 @@ Load `coffeetable-min.js` into the page:
 
   preInit = function() {
     active = false;
-    loaded_scripts.jquery_js = window.jQuery != null;
+    loaded_scripts.jquery_js = window.jQuery != null || window.Zepto != null;
     loaded_scripts.coffeescript_js = window.CoffeeScript != null;
     if (!loaded_scripts.coffeescript_js) {
       if (!settings.autoload_coffee_script) {
