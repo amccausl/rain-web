@@ -18,3 +18,38 @@ Hide/Unhide h
 ###
 
 console.info localStorage
+
+###
+class Router extends Backbone.Router
+
+    routes:
+        'test': 'route1'
+
+    route1: ->
+        console.info 'test route'
+###
+
+TestRouter = Backbone.Router.extend
+  routes:
+    '': 'index'
+    'offers': 'offer'
+
+  initialize: ->
+    console.info 'initialize'
+    @navigate ''
+
+  index: ->
+    console.info 'index'
+
+  offer: ->
+    console.info 'offer test'
+
+window.router = new TestRouter
+
+
+# Bind event to navigation to update breadcrumbs
+window.router.bind('all', ( route, args ) -> console.info( route, args ) )
+
+window.router.navigate 'offers'
+
+Backbone.history.start()
