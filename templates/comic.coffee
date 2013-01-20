@@ -52,7 +52,7 @@ class PreviewView extends Backbone.View
   initialize: ->
     console.info 'PreviewView.initialize'
     _.bindAll @
-    $(@el).css( 'overflow-x', 'hidden' )
+    $(@el).css( 'overflow', 'hidden' )
 
   render: ->
     console.info 'PreviewView.render'
@@ -62,9 +62,7 @@ class PreviewView extends Backbone.View
         html = for i, src of pages
           "<li><img data-index=\"#{i}\" class=\"thumbnail\" src=\"#{src}\" /></a></li>"
 
-    $(@el).html "<ol>#{html}</ol>"
-
-    $(@el).css( 'overflow-y', if $(@el).height() > $(window).height() then 'scroll' else 'visible' )
+    $(@el).html "<ol style=\"width: #{$(@el).width()}px; height: #{$(window).height()}px; padding-right: 20px; margin-left: -30%; overflow-y: auto; overflow-x: hidden;\">#{html}</ol>"
     $(@el).css( 'height', $(window).height() )
 
 
