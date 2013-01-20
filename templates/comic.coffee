@@ -9,7 +9,8 @@ Hide/Unhide h
 
 ### Config ###
 
-localStorage['comic'] = JSON.stringify (
+# Set config to defaults if it hasn't been initialized
+localStorage['comic'] ?= JSON.stringify (
     background:     null    # The background colour, or dynamic if null
     rotation:       null    # The rotation for the pages when browsing (ex. 0, 90, 180, 270, null (best fit)).
     page_display:   1       # Number of pages to display on screen
@@ -41,7 +42,6 @@ class PreviewView extends Backbone.View
   initialize: ->
     console.info 'PreviewView.initialize'
     _.bindAll @
-    $(@el).addClass 'span1'
 
   render: ->
     console.info 'PreviewView.render'
@@ -61,7 +61,6 @@ class MainView extends Backbone.View
   initialize: ->
     console.info 'MainView.initialize'
     _.bindAll @
-    $(@el).addClass( 'span11' )
     @rotation = config.rotation     # Initialize to config value, allow for changing
 
   render: ->
@@ -141,11 +140,15 @@ class ComicView extends Backbone.View
     _.bindAll @
     @model.bind 'change', @render
     @current_page = options.page ? 0
-    $(@el).addClass( 'row-fluid' )
-          .css( 'overflow', 'hidden' )
     @views =
       main: new MainView( model: @model )
       preview: new PreviewView( model: @model )
+
+    # Layout views
+    $(@el).addClass( 'row-fluid' )
+          .css( 'overflow', 'hidden' )
+    $(@views.preview.el).addClass( 'span1' )
+    $(@views.main.el).addClass( 'span11' )
 
     #$(window).on('orientationchange', ( event ) => console.info( 'orientation', @render() ) )
     $(window).bind( 'resize.app', @render )
@@ -183,6 +186,18 @@ class ComicView extends Backbone.View
     @current_page = ( @current_page - 1 + @model.get('pages').length ) % @model.get('pages').length
     @views.main.set_page( @current_page )
 
+  toggle_nav: ->
+    console.info 'ComicView.toggle_nav'
+    if $(@views.preview.el).css( 'display' ) != 'none'
+        $(@views.preview.el).hide()
+        $(@views.main.el).addClass( 'span12' )
+                         .removeClass( 'span11' )
+    else
+        $(@views.preview.el).show()
+        $(@views.main.el).addClass( 'span11' )
+                         .removeClass( 'span12' )
+    @views.main.render()
+
   keypress: ( event ) ->
     console.info 'keypress', event
     switch event.keyCode
@@ -195,7 +210,7 @@ class ComicView extends Backbone.View
 
     switch event.charCode
       when 104 # h
-        console.info 'hide nav'
+        @.toggle_nav()
       when 102 # f
         console.info 'full screen'
       when 99 # c
