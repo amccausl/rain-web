@@ -25,8 +25,7 @@ class Comic extends Backbone.Model
   initialize: ( id ) ->
     console.info 'comic initialized', id
 
-  url: ->
-    return "/static/content/demo/#{@id}.json"
+  url: -> "/static/content/demo/#{@id}.json"
 
 ### Views ###
 
@@ -62,14 +61,19 @@ class MainView extends Backbone.View
   initialize: ->
     console.info 'MainView.initialize'
     _.bindAll @
-    $(@el).addClass 'span11'
+    $(@el).addClass( 'span11' )
     @rotation = config.rotation     # Initialize to config value, allow for changing
 
   render: ->
     console.info 'MainView.render'
+    $(@el).css( 'height', $(window).height() )  # Need to manually size to prevent truncating images
+          .css( 'line-height', $(window).height()+'px' )
     if( @image )
         # Have the option to use the naturalHeight and naturalWidth html5 properties for image sizes
         $image = $(@image)
+        $image.addClass( 'rotate' )
+              .css( 'transform', '' )
+              .css( 'margin', '0 auto' )
 
         # Grab the source and target size for the projected image
         src =
@@ -85,26 +89,27 @@ class MainView extends Backbone.View
         rotation = @rotation
         rotation ?= if Math.abs( target.ratio - src.ratio ) < Math.abs( target.ratio - Math.pow( src.ratio, -1 ) ) then 0 else 270
 
+        if target.width / src.width > target.height / src.height
+            $image.height( '100%' )
+                  .css( 'display', 'block' )
+        else
+            $image.width( '100%' )
+                  .css( 'display', '' )
+
+        switch rotation
+          when 90, 270
+            scale = Math.min( target.height / $(@image).width(), target.width / $(@image).height() )
+
+            if rotation == 90
+                $image.css 'transform', "matrix( 0, #{scale}, #{-scale}, 0, 0, 0 )"
+            else
+                $image.css 'transform', "matrix( 0, #{-scale}, #{scale}, 0, 0, 0 )"
+
+          when 180
+            $image.css( 'transform', "matrix( -1, 0, 0, -1, 0, 0 )" )
+
         console.info "rotation", rotation
 
-        # Create transformation matrix based off size of the container and image to fit
-        switch rotation
-          when 0
-            scale = Math.min( target.width / src.width, target.height / src.height )
-            target.transform = "matrix( #{scale}, 0, 0, #{scale}, #{(target.width - scale * src.width) / 2}, 0 )"
-          when 90
-            scale = Math.min( target.height / src.width, target.width / src.height )
-            target.transform = "matrix( 0, #{scale}, #{-scale}, 0, #{(scale * src.height + target.width) / 2}, #{(target.height - scale * src.width) / 2} )"
-          when 180
-            scale = Math.min( target.width / src.width, target.height / src.height )
-            target.transform = "matrix( #{-scale}, 0, 0, #{-scale}, #{(scale * src.width + target.width) / 2}, #{target.height} )"
-          when 270
-            scale = Math.min( target.height / src.width, target.width / src.height )
-            target.transform = "matrix( 0, #{-scale}, #{scale}, 0, #{(target.width - scale * src.height) / 2}, #{(scale * src.width + target.height) / 2} )"
-
-        $image.css( 'transform-origin', 'left top' )
-              .css( 'transform', target.transform )
-              .addClass( 'rotate' )
         $(@el).html $image
         #$(@el).append "<a href=\"#next\" class=\"next\">next</a><a href=\"#prev\" class=\"prev\">prev</a>"
 
