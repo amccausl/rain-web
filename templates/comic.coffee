@@ -75,6 +75,7 @@ class MainView extends Backbone.View
         $image.addClass( 'rotate' )
               .css( 'transform', '' )
               .css( 'margin', '0 auto' )
+        $(@el).html $image
 
         # Grab the source and target size for the projected image
         src =
@@ -111,11 +112,8 @@ class MainView extends Backbone.View
 
         console.info "rotation", rotation
 
-        $(@el).html $image
-        #$(@el).append "<a href=\"#next\" class=\"next\">next</a><a href=\"#prev\" class=\"prev\">prev</a>"
-
   set_page: ( page_num ) ->
-    console.info 'MainView.set_image'
+    console.info 'MainView.set_page', page_num
 
     pages = @model.get('pages')
 
@@ -169,8 +167,7 @@ class ComicView extends Backbone.View
 
   goto: ( event ) ->
     console.info 'ComicView.goto'
-    event.preventDefault()
-    console.info 'index', $(event.currentTarget).data('index')
+    event?.preventDefault()
     @model.current_page = $(event.currentTarget).data('index')
     @views.main.set_page( @model.current_page )
 
@@ -183,7 +180,7 @@ class ComicView extends Backbone.View
   prev: ( event ) ->
     console.info 'ComicView.prev'
     event?.preventDefault()
-    @model.current_page = ( @model.current_page - 1 ) % @model.get('pages').length
+    @model.current_page = ( @model.current_page - 1 + @model.get('pages').length ) % @model.get('pages').length
     @views.main.set_page( @model.current_page )
 
   keypress: ( event ) ->
