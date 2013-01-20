@@ -7,6 +7,16 @@ Fullscreen  f
 Hide/Unhide h
 ###
 
+### Constants ###
+
+transform_properties =
+    [ 'transform'
+    , '-ms-transform'
+    , '-webkit-transform'
+    , '-o-transform'
+    , '-moz-transform'
+    ]
+
 ### Config ###
 
 # Set config to defaults if it hasn't been initialized
@@ -72,8 +82,8 @@ class MainView extends Backbone.View
         # Have the option to use the naturalHeight and naturalWidth html5 properties for image sizes
         $image = $(@image)
         $image.addClass( 'rotate' )
-              .css( 'transform', '' )
               .css( 'margin', '0 auto' )
+        $image.css( transform, '' ) for transform in transform_properties
         $(@el).html $image
 
         # Grab the source and target size for the projected image
@@ -100,14 +110,10 @@ class MainView extends Backbone.View
         switch rotation
           when 90, 270
             scale = Math.min( target.height / $(@image).width(), target.width / $(@image).height() )
-
-            if rotation == 90
-                $image.css 'transform', "matrix( 0, #{scale}, #{-scale}, 0, 0, 0 )"
-            else
-                $image.css 'transform', "matrix( 0, #{-scale}, #{scale}, 0, 0, 0 )"
+            $image.css( transform, "rotate( #{rotation}deg ) scale( #{scale} )" ) for transform in transform_properties
 
           when 180
-            $image.css( 'transform', "matrix( -1, 0, 0, -1, 0, 0 )" )
+            $image.css( transform, "rotate( #{rotation}deg )" ) for transform in transform_properties
 
         console.info "rotation", rotation
 
