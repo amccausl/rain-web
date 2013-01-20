@@ -146,12 +146,14 @@ class ComicView extends Backbone.View
       preview: new PreviewView( model: @model )
 
     #$(window).on('orientationchange', ( event ) => console.info( 'orientation', @render() ) )
-    $(window).bind 'resize.app', @render
-             .bind 'storage', @render
+    $(window).bind( 'resize.app', @render )
+             .bind( 'storage', @render )
+             .bind( 'keypress', @keypress )
 
   remove: ->
-    $(window).unbind 'resize.app'
-             .unbind 'storage'
+    $(window).unbind( 'resize.app' )
+             .unbind( 'storage' )
+             .unbind( 'keypress' )
     super()
 
   render: ->
@@ -166,16 +168,31 @@ class ComicView extends Backbone.View
     event.preventDefault()
     @views.main.set_image $(event.currentTarget).attr( 'src' )
 
-  next: (event) ->
+  next: ( event ) ->
     console.info 'ComicView.next'
-    event.preventDefault()
+    event?.preventDefault()
 
-  prev: (event) ->
+  prev: ( event ) ->
     console.info 'ComicView.prev'
-    event.preventDefault()
+    event?.preventDefault()
 
-  keypress: (event) ->
-    console.info event
+  keypress: ( event ) ->
+    console.info 'keypress', event
+    switch event.keyCode
+      when 39 # right arrow
+        @.next()
+      when 38 # up arrow
+        console.info 'up arrow'
+      when 37 # left arrow
+        @.prev()
+
+    switch event.charCode
+      when 104 # h
+        console.info 'hide nav'
+      when 102 # f
+        console.info 'full screen'
+      when 99 # c
+        console.info 'config'
 
 ### Router ###
 
