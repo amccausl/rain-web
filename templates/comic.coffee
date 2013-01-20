@@ -137,7 +137,6 @@ class ComicView extends Backbone.View
     'click .thumbnail': 'goto'
     'click .next': 'next'
     'click .prev': 'prev'
-    'keypress .main': 'keypress'
 
   el: $ 'body'
 
@@ -159,12 +158,12 @@ class ComicView extends Backbone.View
     #$(window).on('orientationchange', ( event ) => console.info( 'orientation', @render() ) )
     $(window).bind( 'resize.app', @render )
              .bind( 'storage', @render )
-             .bind( 'keypress', @keypress )
+             .bind( 'keydown', @keypress )
 
   remove: ->
     $(window).unbind( 'resize.app' )
              .unbind( 'storage' )
-             .unbind( 'keypress' )
+             .unbind( 'keydown' )
     super()
 
   render: ->
