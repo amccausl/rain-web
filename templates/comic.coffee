@@ -48,8 +48,8 @@ class PreviewView extends Backbone.View
 
     if( @model.get('pages') != undefined )
         pages = @model.get('pages')
-        html = for src in pages
-          "<li><img class=\"thumbnail\" src=\"#{src}\" /></a></li>"
+        html = for i, src of pages
+          "<li><img data-index=\"#{i}\" class=\"thumbnail\" src=\"#{src}\" /></a></li>"
 
     $(@el).html "<ol>#{html}</ol>"
 
@@ -65,7 +65,8 @@ class MainView extends Backbone.View
     @rotation = config.rotation     # Initialize to config value, allow for changing
 
   render: ->
-    console.info 'MainView.render'
+    console.info 'MainView.render', @model.current_page
+
     $(@el).css( 'height', $(window).height() )  # Need to manually size to prevent truncating images
           .css( 'line-height', $(window).height()+'px' )
     if( @image )
@@ -113,12 +114,14 @@ class MainView extends Backbone.View
         $(@el).html $image
         #$(@el).append "<a href=\"#next\" class=\"next\">next</a><a href=\"#prev\" class=\"prev\">prev</a>"
 
-  set_image: ( src ) ->
+  set_page: ( page_num ) ->
     console.info 'MainView.set_image'
+
+    pages = @model.get('pages')
 
     # Create image element
     @image = new Image
-    @image.src = src
+    @image.src = pages[ page_num ]
     @render()
 
   rotate: ->
@@ -135,10 +138,11 @@ class ComicView extends Backbone.View
 
   el: $ 'body'
 
-  initialize: ->
-    console.info 'ComicView.initialize'
+  initialize: ( options ) ->
+    console.info 'ComicView.initialize', options.page
     _.bindAll @
     @model.bind 'change', @render
+    @model.current_page = options.page
     $(@el).addClass( 'row-fluid' )
           .css( 'overflow', 'hidden' )
     @views =
@@ -163,18 +167,24 @@ class ComicView extends Backbone.View
     @views.preview.render()
     @views.main.render()
 
-  goto: (event) ->
+  goto: ( event ) ->
     console.info 'ComicView.goto'
     event.preventDefault()
-    @views.main.set_image $(event.currentTarget).attr( 'src' )
+    console.info 'index', $(event.currentTarget).data('index')
+    @model.current_page = $(event.currentTarget).data('index')
+    @views.main.set_page( @model.current_page )
 
   next: ( event ) ->
     console.info 'ComicView.next'
     event?.preventDefault()
+    @model.current_page = ( @model.current_page + 1 ) % @model.get('pages').length
+    @views.main.set_page( @model.current_page )
 
   prev: ( event ) ->
     console.info 'ComicView.prev'
     event?.preventDefault()
+    @model.current_page = ( @model.current_page - 1 ) % @model.get('pages').length
+    @views.main.set_page( @model.current_page )
 
   keypress: ( event ) ->
     console.info 'keypress', event
@@ -217,7 +227,7 @@ class ComicRouter extends Backbone.Router
   view: ( id, page ) ->
     console.info 'ComicRouter.view', id, page
     comic = new Comic( id: id )
-    comic_view = new ComicView( model: comic )
+    comic_view = new ComicView( { model: comic, page: page ? 0 } )
     comic.fetch
       success: ( model, response, options ) =>
         console.info 'success', response, model.attributes
