@@ -74,6 +74,7 @@ class MainView extends Backbone.View
     console.info 'MainView.initialize'
     _.bindAll @
     @rotation = config.rotation     # Initialize to config value, allow for changing
+    @current_rotation = @rotation ? 0
 
   render: ->
     console.info 'MainView.render', @current_page
@@ -99,8 +100,8 @@ class MainView extends Backbone.View
             ratio: $(window).height() / $(@el).width()
 
         # Use local setting or calculate best fit
-        rotation = @rotation
-        rotation ?= if Math.abs( target.ratio - src.ratio ) < Math.abs( target.ratio - Math.pow( src.ratio, -1 ) ) then 0 else 270
+        @current_rotation = @rotation
+        @current_rotation ?= if Math.abs( target.ratio - src.ratio ) < Math.abs( target.ratio - Math.pow( src.ratio, -1 ) ) then 0 else 270
 
         if target.width / src.width > target.height / src.height
             $image.height( '100%' )
@@ -109,15 +110,15 @@ class MainView extends Backbone.View
             $image.width( '100%' )
                   .css( 'display', '' )
 
-        switch rotation
+        switch @current_rotation
           when 90, 270
             scale = Math.min( target.height / $(@image).width(), target.width / $(@image).height() )
-            $image.css( transform, "rotate( #{rotation}deg ) scale( #{scale} )" ) for transform in transform_properties
+            $image.css( transform, "rotate( #{@current_rotation}deg ) scale( #{scale} )" ) for transform in transform_properties
 
           when 180
-            $image.css( transform, "rotate( #{rotation}deg )" ) for transform in transform_properties
+            $image.css( transform, "rotate( #{@current_rotation}deg )" ) for transform in transform_properties
 
-        console.info "rotation", rotation
+        console.info "rotation", @current_rotation
 
   set_page: ( page_num ) ->
     console.info 'MainView.set_page', page_num
@@ -130,7 +131,7 @@ class MainView extends Backbone.View
     @render()
 
   rotate: ->
-    @rotation = (@rotation + 90) % 360
+    @rotation = (@current_rotation + 90) % 360
     @render()
 
 
