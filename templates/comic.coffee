@@ -52,6 +52,7 @@ class PreviewView extends Backbone.View
   initialize: ->
     console.info 'PreviewView.initialize'
     _.bindAll @
+    $(@el).css( 'overflow-x', 'hidden' )
 
   render: ->
     console.info 'PreviewView.render'
@@ -62,6 +63,9 @@ class PreviewView extends Backbone.View
           "<li><img data-index=\"#{i}\" class=\"thumbnail\" src=\"#{src}\" /></a></li>"
 
     $(@el).html "<ol>#{html}</ol>"
+
+    $(@el).css( 'overflow-y', if $(@el).height() > $(window).height() then 'scroll' else 'visible' )
+    $(@el).css( 'height', $(window).height() )
 
 
 class MainView extends Backbone.View
@@ -206,6 +210,8 @@ class ComicView extends Backbone.View
   keypress: ( event ) ->
     console.info 'keypress', event
     switch event.keyCode
+      when 72 # h
+        @.toggle_nav()
       when 39 # right arrow
         @.next()
       when 38 # up arrow
