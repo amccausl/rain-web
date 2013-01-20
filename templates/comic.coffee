@@ -65,7 +65,7 @@ class MainView extends Backbone.View
     @rotation = config.rotation     # Initialize to config value, allow for changing
 
   render: ->
-    console.info 'MainView.render', @model.current_page
+    console.info 'MainView.render', @current_page
 
     $(@el).css( 'height', $(window).height() )  # Need to manually size to prevent truncating images
           .css( 'line-height', $(window).height()+'px' )
@@ -140,7 +140,7 @@ class ComicView extends Backbone.View
     console.info 'ComicView.initialize', options.page
     _.bindAll @
     @model.bind 'change', @render
-    @model.current_page = options.page
+    @current_page = options.page ? 0
     $(@el).addClass( 'row-fluid' )
           .css( 'overflow', 'hidden' )
     @views =
@@ -168,20 +168,20 @@ class ComicView extends Backbone.View
   goto: ( event ) ->
     console.info 'ComicView.goto'
     event?.preventDefault()
-    @model.current_page = $(event.currentTarget).data('index')
-    @views.main.set_page( @model.current_page )
+    @current_page = parseInt( $(event.currentTarget).data('index') )
+    @views.main.set_page( @current_page )
 
   next: ( event ) ->
     console.info 'ComicView.next'
     event?.preventDefault()
-    @model.current_page = ( @model.current_page + 1 ) % @model.get('pages').length
-    @views.main.set_page( @model.current_page )
+    @current_page = ( @current_page + 1 ) % @model.get('pages').length
+    @views.main.set_page( @current_page )
 
   prev: ( event ) ->
     console.info 'ComicView.prev'
     event?.preventDefault()
-    @model.current_page = ( @model.current_page - 1 + @model.get('pages').length ) % @model.get('pages').length
-    @views.main.set_page( @model.current_page )
+    @current_page = ( @current_page - 1 + @model.get('pages').length ) % @model.get('pages').length
+    @views.main.set_page( @current_page )
 
   keypress: ( event ) ->
     console.info 'keypress', event
@@ -224,7 +224,7 @@ class ComicRouter extends Backbone.Router
   view: ( id, page ) ->
     console.info 'ComicRouter.view', id, page
     comic = new Comic( id: id )
-    comic_view = new ComicView( { model: comic, page: page ? 0 } )
+    comic_view = new ComicView( { model: comic, page: page } )
     comic.fetch
       success: ( model, response, options ) =>
         console.info 'success', response, model.attributes
