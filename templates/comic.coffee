@@ -267,6 +267,7 @@ class ComicView extends Backbone.View
     console.info( 'ComicView.render', $(window).width(), $(window).height() )
     @views.preview.render()
     @views.main.render()
+    @views.main.set_page @current_page
 
   goto: ( event ) ->
     console.info 'ComicView.goto'
