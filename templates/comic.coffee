@@ -25,6 +25,8 @@ transition_properties =
 
 ### Config ###
 
+class Settings extends Backbone.Model
+
 # Set config to defaults if it hasn't been initialized
 localStorage['comic'] ?= JSON.stringify (
     background:     null    # The background colour, or dynamic if null
@@ -56,7 +58,7 @@ class ConfigView extends Backbone.View
     console.info 'ConfigView.initialize'
     _.bindAll @
     $(@el).attr( 'id', 'config' )
-    $(@el).addClass( 'modal' )
+    $(@el).addClass( 'modal fade' )
 
   render: ->
     console.info 'ConfigView.render'
@@ -118,12 +120,12 @@ class ConfigView extends Backbone.View
 
   toggle: ->
     console.info 'ComicView.toggle'
-    $(@el).toggleClass 'active'
+    $(@el).toggleClass 'in'
     @render()
 
   dismiss: ->
     console.info 'ConfigView.dismiss'
-    $(@el).removeClass 'active'
+    $(@el).removeClass 'in'
 
 
 class ComicListView extends Backbone.View
