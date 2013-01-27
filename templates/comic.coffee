@@ -249,6 +249,7 @@ class ComicView extends Backbone.View
     console.info 'ComicView.initialize', options.page
     _.bindAll @
     @model.bind 'change', @render
+    config.bind 'change', @render
     @current_page = options.page ? 0
     @views =
       main: new MainView( model: @model )
