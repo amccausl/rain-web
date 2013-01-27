@@ -26,17 +26,30 @@ transition_properties =
 ### Config ###
 
 class Settings extends Backbone.Model
-
-# Set config to defaults if it hasn't been initialized
-localStorage['comic'] ?= JSON.stringify (
+  defaults:
     background:     null    # The background colour, or dynamic if null
     rotation:       null    # The rotation for the pages when browsing (ex. 0, 90, 180, 270, null (best fit)).
     page_display:   1       # Number of pages to display on screen
     manga_mode:     false   # If the type can't be determined, browse in manga style
     preview:        null    # Preview as thumbnails, names or no preview
-)
 
-config = JSON.parse( localStorage['comic'] )
+  sync: ( method, model, options ) ->
+    switch method
+      when 'read'
+        console.info( 'sync', method, model, options )
+        model.set JSON.parse( localStorage[ model.id ] )
+      when 'create'
+        localStorage[ model.id ] ?= JSON.stringify( @defaults )
+        model.set JSON.parse( localStorage[ model.id ] )
+        console.info( 'sync', method, model, options )
+      when 'update'
+        console.info( 'sync', method, model, options )
+        localStorage[ model.id ] = JSON.stringify( model.attributes )
+      when 'delete'
+        console.info( 'sync', method, model, options )
+
+config = new Settings( id: 'comic' )
+config.fetch()
 
 ### Models ###
 
@@ -74,11 +87,11 @@ class ConfigView extends Backbone.View
           <label class=\"control-label\" for=\"comic_config_rotation\">Rotation</label>
           <div class=\"controls\">
             <select name=\"rotation\" id=\"comic_config_rotation\">
-              <option value=\"\" #{'selected="selected"' if config.rotation == null}>auto</option>
-              <option value=\"0\" #{'selected="selected"' if config.rotation == 0}>none</option>
-              <option value=\"90\" #{'selected="selected"' if config.rotation == 90}>90°</option>
-              <option value=\"180\" #{'selected="selected"' if config.rotation == 180}>180°</option>
-              <option value=\"270\" #{'selected="selected"' if config.rotation == 270}>270°</option>
+              <option value=\"\" #{'selected="selected"' if config.get('rotation') == null}>auto</option>
+              <option value=\"0\" #{'selected="selected"' if config.get('rotation') == 0}>none</option>
+              <option value=\"90\" #{'selected="selected"' if config.get('rotation') == 90}>90°</option>
+              <option value=\"180\" #{'selected="selected"' if config.get('rotation') == 180}>180°</option>
+              <option value=\"270\" #{'selected="selected"' if config.get('rotation') == 270}>270°</option>
             </select>
           </div>
         </div>
@@ -86,14 +99,14 @@ class ConfigView extends Backbone.View
         <div class=\"control-group\">
           <label class=\"control-label\" for=\"comic_config_page-display\">2-page display</label>
           <div class=\"controls\">
-            <input name=\"page_display\" type=\"checkbox\" id=\"comic_config_page-display\" #{'checked="checked"' if config.page_display == 2} />
+            <input name=\"page_display\" type=\"checkbox\" id=\"comic_config_page-display\" #{'checked="checked"' if config.get('page_display') == 2} />
           </div>
         </div>
 
         <div class=\"control-group\">
           <label class=\"control-label\" for=\"comic_config_background\">Background colour</label>
           <div class=\"controls\">
-            <input name=\"background\" value=\"#{config.background}\" type=\"color\" id=\"comic_config_background\" />
+            <input name=\"background\" value=\"#{config.get('background')}\" type=\"color\" id=\"comic_config_background\" />
           </div>
         </div>
       </form>
@@ -109,14 +122,14 @@ class ConfigView extends Backbone.View
 
     switch key
       when 'page_display'
-        config.page_display = if event.currentTarget.checked then 2 else 1
+        config.set( 'page_display', if event.currentTarget.checked then 2 else 1 )
       when 'rotation'
-        config.rotation = if value == null then null else parseInt value
+        config.set( 'rotation', if value == null then null else parseInt value )
       when 'background'
-        config.background = value
+        config.set( 'background', value )
 
     console.info 'set', key, config[ key ]
-    localStorage['comic'] = JSON.stringify config
+    config.save()
 
   toggle: ->
     console.info 'ComicView.toggle'
@@ -159,7 +172,7 @@ class MainView extends Backbone.View
   initialize: ->
     console.info 'MainView.initialize'
     _.bindAll @
-    @rotation = config.rotation     # Initialize to config value, allow for changing
+    @rotation = config.get('rotation')     # Initialize to config value, allow for changing
     @current_rotation = @rotation ? 0
 
   render: ->
@@ -168,8 +181,8 @@ class MainView extends Backbone.View
     $(@el).css( 'height', $(window).height() )  # Need to manually size to prevent truncating images
           .css( 'line-height', $(window).height()+'px' )
 
-    if( config.background )
-        $(@el).css( 'background-color', config.background )
+    if( config.get('background') )
+        $(@el).css( 'background-color', config.get('background') )
     if( @image )
         # Have the option to use the naturalHeight and naturalWidth html5 properties for image sizes
         $image = $(@image)
