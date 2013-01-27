@@ -10,7 +10,7 @@ getComicR = do
     defaultLayout $ do
         aDomId <- lift newIdent
         setTitle "Rain - Comic"
-        addScriptRemote "/static/js/zepto-1.0rc1.js"
+        addScriptRemote "/static/js/jquery-2.0.0b1.js"
         addScriptRemote "/static/js/coffee-script-1.4.0.min.js"
         addScriptRemote "/static/js/coffeetable-0.3.0.js"
         addScriptRemote "/static/js/underscore-1.4.3.js"

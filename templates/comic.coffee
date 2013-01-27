@@ -17,6 +17,12 @@ transform_properties =
     , '-moz-transform'
     ]
 
+transition_properties =
+    [ 'transition'
+    , '-moz-transition'
+    , '-webkit-transition'
+    ]
+
 ### Config ###
 
 # Set config to defaults if it hasn't been initialized
@@ -41,9 +47,85 @@ class Comic extends Backbone.Model
 ### Views ###
 
 class ConfigView extends Backbone.View
+  tagName: 'aside'
+  events:
+    'change :input': 'update'
+    'click .close': 'dismiss'
+
   initialize: ->
     console.info 'ConfigView.initialize'
     _.bindAll @
+    $(@el).attr( 'id', 'config' )
+    $(@el).addClass( 'modal' )
+
+  render: ->
+    console.info 'ConfigView.render'
+    $(@el).html '
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>Preferences</h3>
+    </div>
+
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="comic_config_rotation">Rotation</label>
+          <div class="controls">
+            <select name="rotation" id="comic_config_rotation">
+              <option value="">auto</option>
+              <option value="0">none</option>
+              <option value="90">90%</option>
+              <option value="180">180%</option>
+              <option value="270">270%</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="comic_config_page-display">2-page display</label>
+          <div class="controls">
+            <input name="page_display" type="checkbox" id="comic_config_page-display" />
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="comic_config_background">Background colour</label>
+          <div class="controls">
+            <input name="background" value="rgb(128,0,0);" type="color" id="comic_config_background" />
+          </div>
+        </div>
+      </form>
+    </div>'
+
+  update: ( event ) ->
+    console.info 'ConfigView.update', event
+    key = $(event.currentTarget).attr 'name'
+    value = $(event.currentTarget).val()
+
+    if( value == '' )
+        value = null
+
+    switch key
+      when 'page_display'
+        config.page_display = if event.currentTarget.checked then 2 else 1
+      when 'rotation', 'background'
+        config[ key ] = value
+
+    console.info 'set', key, config[ key ]
+    localStorage['comic'] = JSON.stringify config
+
+  toggle: ->
+    console.info 'ComicView.toggle'
+    $(@el).toggleClass 'active'
+    @render()
+
+  dismiss: ->
+    console.info 'ConfigView.dismiss'
+    $(@el).removeClass 'active'
+
+
+class ComicListView extends Backbone.View
+  el: $ 'body'
 
 
 class PreviewView extends Backbone.View
@@ -151,12 +233,17 @@ class ComicView extends Backbone.View
     @views =
       main: new MainView( model: @model )
       preview: new PreviewView( model: @model )
+      config: new ConfigView
 
     # Layout views
     $(@el).addClass( 'row-fluid' )
           .css( 'overflow', 'hidden' )
     $(@views.preview.el).addClass( 'span1' )
     $(@views.main.el).addClass( 'span11' )
+
+    $(@el).html( @views.preview.el )
+          .append( @views.main.el )
+          .append( @views.config.el )
 
     #$(window).on('orientationchange', ( event ) => console.info( 'orientation', @render() ) )
     $(window).bind( 'resize.app', @render )
@@ -171,8 +258,6 @@ class ComicView extends Backbone.View
 
   render: ->
     console.info( 'ComicView.render', $(window).width(), $(window).height() )
-    $(@el).html @views.preview.el
-    $(@el).append @views.main.el
     @views.preview.render()
     @views.main.render()
 
@@ -210,27 +295,23 @@ class ComicView extends Backbone.View
     console.info 'keypress', event
     switch event.keyCode
       when 72 # h
-        @.toggle_nav()
+        @toggle_nav()
+      when 67 # c
+        @views.config.toggle()
       when 39 # right arrow
-        @.next()
+        @next()
       when 38 # up arrow
         console.info 'up arrow'
       when 37 # left arrow
-        @.prev()
-
-    switch event.charCode
-      when 104 # h
-        @.toggle_nav()
-      when 102 # f
-        console.info 'full screen'
-      when 99 # c
-        console.info 'config'
+        @prev()
+      when 27 # esc
+        @views.config.dismiss()
 
 ### Router ###
+active_view = null
 
 class ComicRouter extends Backbone.Router
   routes:
-    'config': 'config'
     '': 'index'
     ':id': 'view'
     ':id/p:page': 'view'
@@ -238,16 +319,14 @@ class ComicRouter extends Backbone.Router
   initialize: ->
     console.info 'ComicRouter.initialize'
 
-  config: ->
-    console.info 'ComicRouter.config'
-
   # TODO: should be the list view
   index: ->
     console.info 'ComicRouter.index'
-    new ComicView
+    active_view?.remove()
 
   view: ( id, page ) ->
     console.info 'ComicRouter.view', id, page
+    active_view?.remove()
     comic = new Comic( id: id )
     comic_view = new ComicView( { model: comic, page: page } )
     comic.fetch
