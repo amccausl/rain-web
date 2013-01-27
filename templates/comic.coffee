@@ -37,7 +37,7 @@ class Settings extends Backbone.Model
     switch method
       when 'read'
         console.info( 'sync', method, model, options )
-        model.set JSON.parse( localStorage[ model.id ] )
+        model.set( if localStorage[ model.id ] then JSON.parse( localStorage[ model.id ] ) else @defaults )
       when 'create'
         localStorage[ model.id ] ?= JSON.stringify( @defaults )
         model.set JSON.parse( localStorage[ model.id ] )
@@ -181,8 +181,6 @@ class MainView extends Backbone.View
     $(@el).css( 'height', $(window).height() )  # Need to manually size to prevent truncating images
           .css( 'line-height', $(window).height()+'px' )
 
-    if( config.get('background') )
-        $(@el).css( 'background-color', config.get('background') )
     if( @image )
         # Have the option to use the naturalHeight and naturalWidth html5 properties for image sizes
         $image = $(@image)
@@ -230,7 +228,24 @@ class MainView extends Backbone.View
     # Create image element
     @image = new Image
     @image.src = pages[ page_num ]
+    @set_background()
     @render()
+
+  set_background: ->
+    if( config.get('background') )
+        return $(@el).css( 'background-color', config.get('background') )
+
+    to_hex = ( n ) ->
+      console.info 'convert', n
+      if( n == null )
+        return '00'
+      n = parseInt( n )
+      if( n == 0 || isNaN( n ) )
+        return '00'
+      n = Math.min( Math.max( 0, Math.round( n ) ), 255 )
+      return '0123456789ABCDEF'.charAt( ( n - n % 16 ) / 16 ) + '0123456789ABCDEF'.charAt( n % 16 )
+
+    $(@el).css( 'background-color', '#' + ( to_hex( section ) for section in getDominantColor( @image ) ).join( '' ) )
 
   rotate: ->
     @rotation = (@current_rotation + 90) % 360
@@ -345,12 +360,13 @@ class ComicRouter extends Backbone.Router
   index: ->
     console.info 'ComicRouter.index'
     active_view?.remove()
+    active_view = new ComicListView
 
   view: ( id, page ) ->
     console.info 'ComicRouter.view', id, page
     active_view?.remove()
     comic = new Comic( id: id )
-    comic_view = new ComicView( { model: comic, page: page } )
+    active_view = new ComicView( { model: comic, page: page } )
     comic.fetch
       success: ( model, response, options ) =>
         console.info 'success', response, model.attributes
