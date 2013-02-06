@@ -75,42 +75,43 @@ class ConfigView extends Backbone.View
 
   render: ->
     console.info 'ConfigView.render'
-    $(@el).html "
-    <div class=\"modal-header\">
-      <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>
+    $(@el).html """
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
       <h3>Preferences</h3>
     </div>
 
-    <div class=\"modal-body\">
-      <form class=\"form-horizontal\">
-        <div class=\"control-group\">
-          <label class=\"control-label\" for=\"comic_config_rotation\">Rotation</label>
-          <div class=\"controls\">
-            <select name=\"rotation\" id=\"comic_config_rotation\">
-              <option value=\"\" #{'selected="selected"' if config.get('rotation') == null}>auto</option>
-              <option value=\"0\" #{'selected="selected"' if config.get('rotation') == 0}>none</option>
-              <option value=\"90\" #{'selected="selected"' if config.get('rotation') == 90}>90°</option>
-              <option value=\"180\" #{'selected="selected"' if config.get('rotation') == 180}>180°</option>
-              <option value=\"270\" #{'selected="selected"' if config.get('rotation') == 270}>270°</option>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="comic_config_rotation">Rotation</label>
+          <div class="controls">
+            <select name="rotation" id="comic_config_rotation">
+              <option value="" #{'selected="selected"' if config.get('rotation') == null}>auto</option>
+              <option value="0" #{'selected="selected"' if config.get('rotation') == 0}>none</option>
+              <option value="90" #{'selected="selected"' if config.get('rotation') == 90}>90°</option>
+              <option value="180" #{'selected="selected"' if config.get('rotation') == 180}>180°</option>
+              <option value="270" #{'selected="selected"' if config.get('rotation') == 270}>270°</option>
             </select>
           </div>
         </div>
 
-        <div class=\"control-group\">
-          <label class=\"control-label\" for=\"comic_config_page-display\">2-page display</label>
-          <div class=\"controls\">
-            <input name=\"page_display\" type=\"checkbox\" id=\"comic_config_page-display\" #{'checked="checked"' if config.get('page_display') == 2} />
+        <div class="control-group">
+          <label class="control-label" for="comic_config_page-display">2-page display</label>
+          <div class="controls">
+            <input name="page_display" type="checkbox" id="comic_config_page-display" #{'checked="checked"' if config.get('page_display') == 2} />
           </div>
         </div>
 
-        <div class=\"control-group\">
-          <label class=\"control-label\" for=\"comic_config_background\">Background colour</label>
-          <div class=\"controls\">
-            <input name=\"background\" value=\"#{config.get('background')}\" type=\"color\" id=\"comic_config_background\" />
+        <div class="control-group">
+          <label class="control-label" for="comic_config_background">Background colour</label>
+          <div class="controls">
+            <input name="background" value="#{config.get('background')}" type="color" id="comic_config_background" />
           </div>
         </div>
       </form>
-    </div>"
+    </div>
+"""
 
   update: ( event ) ->
     console.info 'ConfigView.update', event
@@ -159,9 +160,9 @@ class PreviewView extends Backbone.View
     if( @model.get('pages') != undefined )
         pages = @model.get('pages')
         html = for i, src of pages
-          "<li><img data-index=\"#{i}\" class=\"thumbnail\" src=\"#{src}\" /></a></li>"
+          """<li><img data-index="#{i}" class="thumbnail" src="#{src}" /></a></li>"""
 
-    $(@el).html "<ol style=\"width: #{$(@el).width()}px; height: #{$(window).height()}px; padding-right: 20px; margin-left: -30%; overflow-y: auto; overflow-x: hidden;\">#{html}</ol>"
+    $(@el).html """<ol style="width: #{$(@el).width()}px; height: #{$(window).height()}px; padding-right: 20px; margin-left: -30%; overflow-y: auto; overflow-x: hidden;">#{html}</ol>"""
     $(@el).css( 'height', $(window).height() )
 
 
@@ -228,24 +229,9 @@ class MainView extends Backbone.View
     # Create image element
     @image = new Image
     @image.src = pages[ page_num ]
-    @set_background()
-    @render()
-
-  set_background: ->
     if( config.get('background') )
-        return $(@el).css( 'background-color', config.get('background') )
-
-    to_hex = ( n ) ->
-      console.info 'convert', n
-      if( n == null )
-        return '00'
-      n = parseInt( n )
-      if( n == 0 || isNaN( n ) )
-        return '00'
-      n = Math.min( Math.max( 0, Math.round( n ) ), 255 )
-      return '0123456789ABCDEF'.charAt( ( n - n % 16 ) / 16 ) + '0123456789ABCDEF'.charAt( n % 16 )
-
-    $(@el).css( 'background-color', '#' + ( to_hex( section ) for section in getDominantColor( @image ) ).join( '' ) )
+        $(@el).css( 'background-color', config.get('background') )
+    @render()
 
   rotate: ->
     @rotation = (@current_rotation + 90) % 360
