@@ -15,5 +15,5 @@ getComicR = do
         addScriptRemote "/static/js/coffeetable-0.3.0.js"
         addScriptRemote "/static/js/underscore-1.4.3.js"
         addScriptRemote "/static/js/backbone-0.9.9.js"
-        toWidget $(coffeeFile "templates/comic.coffee")
+        toWidget $(coffeeFileReload "templates/comic.coffee")
 
