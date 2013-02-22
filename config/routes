@@ -6,3 +6,4 @@
 
 /comics ComicR GET
 / HomeR GET POST
+/data DataR GET
