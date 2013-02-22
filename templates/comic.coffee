@@ -57,7 +57,7 @@ class Comic extends Backbone.Model
   initialize: ( id ) ->
     console.info 'comic initialized', id
 
-  url: -> "/static/content/demo/#{@id}.json"
+  url: -> "/data/#{@id}.json"
 
 ### Views ###
 
@@ -223,6 +223,7 @@ class MainView extends Backbone.View
 
   set_page: ( page_num ) ->
     console.info 'MainView.set_page', page_num
+
 
     pages = @model.get('pages')
 
