@@ -57,7 +57,7 @@ class Comic extends Backbone.Model
   initialize: ( id ) ->
     console.info 'comic initialized', id
 
-  url: -> "/data/#{@id}.json"
+  url: -> "/data/#{@id}"
 
 ### Views ###
 
