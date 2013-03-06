@@ -11,6 +11,7 @@ getComicR = do
         aDomId <- lift newIdent
         setTitle "Rain - Comic"
         addScriptRemote "/static/js/jquery-2.0.0b2.js"
+        addScriptRemote "/static/js/jquery.mobile-1.3.0.js"
         addScriptRemote "/static/js/coffee-script-1.4.0.min.js"
         addScriptRemote "/static/js/coffeetable-0.3.0.js"
         addScriptRemote "/static/js/underscore-1.4.4.js"
